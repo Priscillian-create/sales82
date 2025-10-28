@@ -12,7 +12,7 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cGF0aCBmaWxsPSIjMjNjM2U1MCIgZD0iTTE0OCAxMjBjMC0xNy43IDE0LjMtMzIgMzItMzJzMzIgMTQuMyAzMiAzMmMwIDguOC0zLjYgMTYuNy05LjQgMjIuNmwtMTIuMiAxMi4yYy0yLjgtMi44LTYuNi00LjQtMTAuNi00LjRzLTcuOCAxLjYtMTAuNiA0LjRsLTEyLjItMTIuMmMtNS44LTUuOC05LjQtMTMuOC05LjQtMjIuNiAwLTE3LjcgMTQuMy0zMiAzMi0zMnMzMiAxNC4zIDMyIDMyYzAgOC44LTMuNiAxNi43LTkuNCAyMi42bDQuNiA0LjZjNS44IDUuOCAxNS4yIDUuOCAyMXMtNS44IDE1LjItNS44IDIxbC00LjYgNC42YzUuOCA1LjggMTMuOCA5LjQgMjIuNiA5LjQgMTcuNyAwIDMyLTE0LjMgMzItMzJ6TTE0OCAxMjBjMC04LjgtNy4yLTE2LTE2LTE2cy0xNiA3LjItMTYgMTYgNy4yIDE2IDE2IDE2IDE2LTcuMiAxNi0xNnoiLz48L3N2Zz4=">
     
     <!-- UPDATE: Link to external manifest file for PWA -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlBhIEdlcnJ5cyBNYXJ0IiwKICAic2hvcnRfbmFtZSI6ICJQYSBHZXJyeXMiLAogICJkZXNjcmlwdGlvbiI6ICJTdXBlcm1hcmtldCBQT1MgU3lzdGVtIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMyYzNlNTAiLAogICJ0aGVtZV9jb2xvciI6ICIjMmMzZTUwIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNITTZMeTlsZUdGdGNHeGxMbU52YlM5MmFXUmxieTVzYjJOaGRHbHZibk1nWm1sc1pWOXVjbVZ1ZENJNklqRXlNelExTVRJNE1UQXdNak0xT2pBNE9EazJNVFUyTlRZNU5qVTBNVEU1TmpVME1UVTJNVGt4TlE9PSIsCiAgICAgICJzaXplcyI6ICIxNDR4MTQ0IiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdCn0=">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlBhIEdlcnJ5cyBNYXJ0IiwKICAic2hvcnRfbmFtZSI6ICJQYSBHZXJyeXMiLAogICJkZXNjcmlwdGlvbiI6ICJTdXBlcm1hcmtldCBQT1MgU3lzdGVtIiwKICAic3RhcnRfdXJsIjogIi4vIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMmMzZTUwIiwKICAidGhlbWVfY29sb3IiOiAiIzJjM2U1MCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMll6QjRiV3h1Y3owaWFIVFhNWEIwTlM5eWJVNU5aV0p2YjJ4b1lYSmhiR3c2T1RZNU5ETTNNak0xTnpBNE1qVTJNVFUyTmpVNU1qQXdNakEwT0RZNU5UQXhNakU0T2pVMk9EazJNVGt4T1E9PSIsCiAgICAgICJzaXplcyI6ICIxNDR4MTQ0IiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdCn0=">
     
     <title>Pa Gerrys Mart - POS System</title>
     
@@ -1838,25 +1838,18 @@
         const db = firebase.firestore();
         const rtdb = firebase.database();
 
-        // ✅ Enable offline persistence for Firestore (Firebase v8 syntax)
+        // FIX: Updated to use new Firestore persistence API
         try {
-            db.enablePersistence()
-                .then(() => {
-                    console.log("Firestore persistence enabled");
-                })
-                .catch((err) => {
-                    if (err.code === 'failed-precondition') {
-                        // Multiple tabs open — persistence can only be enabled in one tab at a time
-                        console.log("Persistence failed: Multiple tabs open");
-                    } else if (err.code === 'unimplemented') {
-                        // The current browser does not support all features required for persistence
-                        console.log("Persistence failed: Browser not supported");
-                    } else {
-                        console.warn("Error enabling persistence:", err);
-                    }
-                });
+            // Use the new FirestoreSettings.cache API instead of deprecated enableIndexedDbPersistence
+            db.settings({
+                cache: {
+                    // Enable offline persistence
+                    persistence: firebase.firestore.LOCAL_PERSISTENCE
+                }
+            });
+            console.log("Firestore persistence enabled with new API");
         } catch (err) {
-            console.warn("Unexpected error enabling persistence:", err);
+            console.warn("Error enabling persistence:", err);
         }
 
         // FIX: Add connection retry logic
@@ -2740,10 +2733,24 @@
             }).format(amount);
         }
         
+        // FIX: Added null check for toDate() function
         function formatDate(date) {
             if (!date) return '-';
             
-            const d = date.toDate ? date.toDate() : new Date(date);
+            // Check if date is a Firestore Timestamp
+            if (date && typeof date.toDate === 'function') {
+                const d = date.toDate();
+                return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+            
+            // If it's already a Date object or string
+            const d = date instanceof Date ? date : new Date(date);
+            
+            // Check if the date is valid
+            if (isNaN(d.getTime())) {
+                return '-';
+            }
+            
             return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
         
@@ -2954,6 +2961,7 @@
             updateSalesTables();
         }
         
+        // FIX: Added null checks for toDate() in updateSalesTables
         function updateSalesTables() {
             // Update recent sales table
             if (sales.length === 0) {
@@ -2967,8 +2975,13 @@
                 
                 // Sort sales by date (newest first)
                 const sortedSales = [...sales].sort((a, b) => {
-                    const dateA = a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-                    const dateB = b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                    // FIX: Added null checks for toDate()
+                    const dateA = a.createdAt && typeof a.createdAt.toDate === 'function' 
+                        ? a.createdAt.toDate() 
+                        : new Date(a.createdAt || 0);
+                    const dateB = b.createdAt && typeof b.createdAt.toDate === 'function' 
+                        ? b.createdAt.toDate() 
+                        : new Date(b.createdAt || 0);
                     return dateB - dateA;
                 });
                 
@@ -3006,8 +3019,13 @@
                 
                 // Sort deleted sales by date (newest first)
                 const sortedDeletedSales = [...deletedSales].sort((a, b) => {
-                    const dateA = a.deletedAt.toDate ? a.deletedAt.toDate() : new Date(a.deletedAt);
-                    const dateB = b.deletedAt.toDate ? b.deletedAt.toDate() : new Date(b.deletedAt);
+                    // FIX: Added null checks for toDate()
+                    const dateA = a.deletedAt && typeof a.deletedAt.toDate === 'function' 
+                        ? a.deletedAt.toDate() 
+                        : new Date(a.deletedAt || 0);
+                    const dateB = b.deletedAt && typeof b.deletedAt.toDate === 'function' 
+                        ? b.deletedAt.toDate() 
+                        : new Date(b.deletedAt || 0);
                     return dateB - dateA;
                 });
                 
@@ -3040,6 +3058,7 @@
             }, 500);
         }
         
+        // FIX: Added null checks for toDate() in generateReport
         function generateReport() {
             const selectedDate = document.getElementById('report-date').value;
             
@@ -3065,7 +3084,10 @@
             const dailySales = [];
             
             sales.forEach(sale => {
-                const saleDate = sale.createdAt.toDate ? sale.createdAt.toDate() : new Date(sale.createdAt);
+                // FIX: Added null checks for toDate()
+                const saleDate = sale.createdAt && typeof sale.createdAt.toDate === 'function' 
+                    ? sale.createdAt.toDate() 
+                    : new Date(sale.createdAt || 0);
                 const saleDateString = saleDate.toISOString().split('T')[0];
                 
                 if (saleDateString === selectedDate) {
@@ -3092,8 +3114,13 @@
                 
                 // Sort by time
                 dailySales.sort((a, b) => {
-                    const dateA = a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-                    const dateB = b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+                    // FIX: Added null checks for toDate()
+                    const dateA = a.createdAt && typeof a.createdAt.toDate === 'function' 
+                        ? a.createdAt.toDate() 
+                        : new Date(a.createdAt || 0);
+                    const dateB = b.createdAt && typeof b.createdAt.toDate === 'function' 
+                        ? b.createdAt.toDate() 
+                        : new Date(b.createdAt || 0);
                     return dateB - dateA;
                 });
                 
